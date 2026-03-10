@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ad Launch Center — AIFintech Marketing Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Outfit',sans-serif;background:#f5f7fb;display:flex;height:100vh;overflow:hidden;}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:4px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+  .nav-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:#374151;transition:background .12s;margin-bottom:1px;}
+  .nav-item:hover{background:#f0f4ff;}
+  .nav-item.active{background:#eff6ff;color:#2563eb;font-weight:600;}
+  .nav-child{padding-left:32px;font-size:12.5px;color:#6b7280;}
+  .nav-child.active{color:#2563eb;font-weight:600;background:#eff6ff;}
+  .camp-card{border:2px solid #e8ecf0;border-radius:14px;padding:18px 20px;margin-bottom:12px;background:#fafafa;cursor:pointer;transition:all .15s;}
+  .camp-card:hover{border-color:#3b82f6;background:#f0f6ff;}
+  .camp-card.selected{border-color:#3b82f6;background:#f0f6ff;}
+  .plat-card{border:2px solid #e8ecf0;border-radius:16px;padding:28px 20px;text-align:center;background:#fafafa;cursor:pointer;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+  .plat-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.10);}
+  .btn-next{padding:10px 28px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Outfit',sans-serif;}
+  .btn-next:hover:not(:disabled){background:#1d4ed8!important;transform:translateY(-1px);}
+  .btn-next:disabled{background:#e2e8f0!important;color:#94a3b8!important;cursor:not-allowed;}
+  .btn-back{padding:10px 22px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#374151;transition:all .15s;font-family:'Outfit',sans-serif;}
+  .btn-back:hover:not(:disabled){background:#f3f4f6;}
+  .btn-back:disabled{color:#cbd5e1;cursor:not-allowed;}
+  input,select{font-family:'Outfit',sans-serif;transition:border .15s,box-shadow .15s;}
+  input:focus,select:focus{outline:none;border-color:#3b82f6!important;box-shadow:0 0 0 3px rgba(59,130,246,.12)!important;}
+  .step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all .2s;flex-shrink:0;}
+  .step-line{width:16px;height:2px;border-radius:2px;margin:0 4px;}
+  .card{background:#fff;border-radius:18px;padding:28px 30px;box-shadow:0 1px 12px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+  .panel{background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 12px rgba(0,0,0,.06);}
+  .badge-new{font-size:9px;background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:1px 5px;font-weight:700;}
+  label{font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:6px;}
+  .field-input{width:100%;padding:11px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#0f172a;background:#fafafa;}
+  .field-input.prefix{padding-left:26px;}
+  .prefix-wrap{position:relative;}
+  .prefix-sym{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none;}
+  #sidebar{width:220px;background:#fff;border-right:1px solid #e8ecf0;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+  #main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  #topbar{background:#fff;border-bottom:1px solid #e8ecf0;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  #content{flex:1;overflow-y:auto;padding:28px 32px;}
+  .grid2{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;}
+  .grid2.full{grid-template-columns:1fr;}
+  .grid2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .budget-bar{background:#e2e8f0;border-radius:100px;overflow:hidden;}
+  .spin-el{width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
+  .section-label{font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.08em;margin-bottom:12px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div style="padding:20px 18px 16px;border-bottom:1px solid #f0f2f5;">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;">💹</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#111;line-height:1.2;">AIFintech</div>
+        <div style="font-size:10px;color:#9ca3af;font-weight:500;">Marketing Portal</div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:6px 10px 2px;">
+    <div class="nav-item"><span>☑️</span> My Tasks <span style="margin-left:auto;font-size:11px;color:#9ca3af;">▾</span></div>
+  </div>
+  <div style="padding:4px 10px;flex:1;" id="navMenu"></div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:#9ca3af;">Ad Center</span>
+      <span style="font-size:12px;color:#d1d5db;">›</span>
+      <span id="breadcrumb" style="font-size:13px;font-weight:600;color:#111;">🚀 Launch Ads</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:32px;height:32px;background:#f3f4f6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;">🔔</div>
+      <div style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;">投</div>
+        <span style="font-size:13px;font-weight:500;color:#374151;">投手A</span>
+        <span style="font-size:10px;color:#9ca3af;">▾</span>
+      </div>
+    </div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ─── Data ─────────────────────────────────────────────────────────────────────
+// remaining = budget - adSpent  (no influencer cost involved)
+const CAMPAIGNS_INIT = [
+  { id:"C-2024-001", name:"Q1 Latam Growth Campaign", budget:50000, adSpent:14400, influencers:8,  region:"Latam"  },
+  { id:"C-2024-002", name:"Brazil Market Expansion",  budget:80000, adSpent:9200,  influencers:12, region:"Brazil" },
+  { id:"C-2024-003", name:"ES Spring Promo",          budget:30000, adSpent:6700,  influencers:5,  region:"Latam"  },
+];
+// ─── Ads Performance Data ────────────────────────────────────────────────────
+const ADS_MANAGERS = [
+  { id:"am1", name:"Alex Chen",   totalBudget:120000, spent:98500,
+    metrics:{ impressions:2500000, clicks:128000, leads:3200, ev:156000, firstDeposit:890, depositAmount:445000 } },
+  { id:"am2", name:"Jordan Lee",  totalBudget:95000,  spent:92000,
+    metrics:{ impressions:1980000, clicks:104000, leads:2700, ev:128000, firstDeposit:740, depositAmount:368000 } },
+  { id:"am3", name:"Sam Wilson",  totalBudget:80000,  spent:61200,
+    metrics:{ impressions:1420000, clicks:87500,  leads:2100, ev:97000,  firstDeposit:580, depositAmount:292000 } },
+  { id:"am4", name:"Taylor Kim",  totalBudget:65000,  spent:65000,
+    metrics:{ impressions:1650000, clicks:71000,  leads:1800, ev:84000,  firstDeposit:490, depositAmount:248000 } },
+  { id:"am5", name:"Morgan Zhang",totalBudget:50000,  spent:38500,
+    metrics:{ impressions:980000,  clicks:54000,  leads:1450, ev:71000,  firstDeposit:390, depositAmount:195000 } },
+];
+
+const PLATFORMS = [
+  { id:"meta",   name:"Meta Ads",   icon:"f", color:"#1877F2", bg:"#e7f0fd", desc:"Facebook & Instagram" },
+  { id:"google", name:"Google Ads", icon:"G", color:"#EA4335", bg:"#fdecea", desc:"Search & Display"     },
+];
+const OBJECTIVES = ["Brand Awareness","Traffic","Lead Generation","Conversions"];
+const AUDIENCES  = ["Lookalike – Existing Customers","Interest – Finance & Investment","Retargeting – Website Visitors","Custom – Influencer Followers"];
+const STEPS = ["Campaign","Platform","Budget","Audience","Launch"];
+const NAV = [
+  { label:"Influencer Manage.", icon:"👤", children:["Influencers","Influencer Payments","Influencer Budget Ove...","Influencer Performanc..."] },
+  { label:"Campaign Manage.",   icon:"📢", children:["Campaigns","Campaign Payments","Campaign Budget Ov...","Campaign Performan..."] },
+  { label:"Ad Center", icon:"🚀", children:["Launch Ads","Ads Performance"], isNew:true },
+  { label:"Budget Control",     icon:"💰", children:[] },
+  { label:"Payment Manageme...", icon:"💳", children:[] },
+  { label:"Tracking Link",      icon:"🔗", children:[] },
+  { label:"Task Management",    icon:"✅", children:[] },
+  { label:"Reporting",          icon:"📊", children:[] },
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let S = {
+  campaigns: JSON.parse(JSON.stringify(CAMPAIGNS_INIT)),
+  expandedNav: ["Influencer Manage.","Campaign Manage.","Ad Center"],
+  activeNav: "Launch Ads",
+  step: 0,
+  launched: false,
+  launchSnapshot: null,
+  form: { campaign:null, platform:null, dailyBudget:"", totalBudget:"", startDate:"", endDate:"", objective:"", audience:"", adName:"", utm:"" },
+  perf: { expandedId: "am1", rankBy: "depositAmount", period: "Last 30 days",
+           filterChannel: "All", filterCampaign: "All", filterCountry: "All" },
+};
+
+// ─── Pure helpers ─────────────────────────────────────────────────────────────
+const fmt     = n  => "$" + Number(n||0).toLocaleString();
+const avail   = c  => c.budget - c.adSpent;          // ← simple: budget minus ad spend only
+const pctUsed = c  => Math.round(c.adSpent / c.budget * 100);
+const estDays = () => {
+  if (!S.form.startDate || !S.form.endDate) return 0;
+  return Math.max(1, Math.round((new Date(S.form.endDate) - new Date(S.form.startDate)) / 86400000));
+};
+const estTotal  = () => Number(S.form.dailyBudget || 0) * estDays();
+const liveC     = () => S.form.campaign ? S.campaigns.find(c => c.id === S.form.campaign.id) : null;
+const overBudget= () => { const lc = liveC(); return lc && estTotal() > 0 && estTotal() > avail(lc); };
+const canNext   = () => {
+  if (S.step===0) return !!S.form.campaign;
+  if (S.step===1) return !!S.form.platform;
+  if (S.step===2) return S.form.dailyBudget && S.form.startDate && S.form.endDate && !overBudget();
+  if (S.step===3) return S.form.objective && S.form.audience;
+  return true;
+};
+
+// ─── Nav ──────────────────────────────────────────────────────────────────────
+function renderNav() {
+  document.getElementById("navMenu").innerHTML = NAV.map(item => {
+    const open   = S.expandedNav.includes(item.label);
+    const active = S.activeNav === item.label;
+    return `<div>
+      <div class="nav-item${active?" active":""}" onclick="toggleNav('${item.label}')">
+        <span style="font-size:14px;">${item.icon}</span>
+        <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.label}</span>
+        ${item.isNew ? '<span class="badge-new">NEW</span>' : ""}
+        ${item.children.length ? `<span style="font-size:10px;color:#9ca3af;">${open?"▾":"▸"}</span>` : ""}
+      </div>
+      ${open ? item.children.map(c => `<div class="nav-item nav-child${S.activeNav===c?" active":""}" onclick="setActive('${c}')">${c}</div>`).join("") : ""}
+    </div>`;
+  }).join("");
+}
+function toggleNav(label) {
+  const item = NAV.find(n=>n.label===label);
+  if (item?.children.length) {
+    const isExpanding = !S.expandedNav.includes(label);
+    S.expandedNav = isExpanding ? [...S.expandedNav, label] : S.expandedNav.filter(x=>x!==label);
+    if (isExpanding && item.children.length) S.activeNav = item.children[0];
+    else if (!isExpanding) S.activeNav = label;
+  } else {
+    S.activeNav = label;
+  }
+  renderNav();
+  rerender();
+}
+function setActive(label) { S.activeNav = label; rerender(); }
+
+// ─── Stepper ──────────────────────────────────────────────────────────────────
+function stepperHTML() {
+  return STEPS.map((s,i) => `
+    <div style="display:flex;align-items:center;gap:5px;">
+      <div class="step-dot" onclick="${i<S.step?`goStep(${i})`:""}"
+        style="background:${i<S.step?"#22c55e":i===S.step?"#2563eb":"#e2e8f0"};
+               color:${i<=S.step?"#fff":"#94a3b8"};
+               box-shadow:${i===S.step?"0 0 0 4px rgba(37,99,235,.18)":"none"};
+               cursor:${i<S.step?"pointer":"default"};">
+        ${i<S.step?"✓":i+1}
+      </div>
+      <span style="font-size:11px;color:${i===S.step?"#2563eb":i<S.step?"#22c55e":"#94a3b8"};font-weight:${i===S.step?700:400};">${s}</span>
+      ${i<STEPS.length-1?`<div class="step-line" style="background:${i<S.step?"#22c55e":"#e2e8f0"};"></div>`:""}
+    </div>`).join("");
+}
+
+// ─── Campaign cards ───────────────────────────────────────────────────────────
+function campaignCardsHTML() {
+  return S.campaigns.map(c => {
+    const av  = avail(c);
+    const pct = pctUsed(c);
+    const sel = S.form.campaign?.id === c.id;
+    const low = av < 3000;
+    return `
+    <div class="camp-card${sel?" selected":""}" onclick="selectCampaign('${c.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+            ${sel?'<span style="color:#2563eb;">●</span>':""}
+            <span style="font-weight:700;font-size:14px;color:#0f172a;">${c.name}</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:#64748b;">
+            <span>📍 ${c.region}</span>
+            <span>👥 ${c.influencers} influencers</span>
+            <span style="background:#dcfce7;color:#166534;padding:1px 7px;border-radius:20px;font-weight:600;">Active</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:2px;">可用于投放</div>
+          <div style="font-size:22px;font-weight:800;color:${low?"#ef4444":"#0f172a"};">${fmt(av)}</div>
+          <div style="font-size:11px;color:#94a3b8;">of ${fmt(c.budget)}</div>
+        </div>
+      </div>
+      <!-- single-colour progress bar: ad spend only -->
+      <div class="budget-bar" style="height:8px;margin-bottom:8px;">
+        <div style="width:${pct}%;height:100%;background:${pct>85?"#ef4444":"#3b82f6"};border-radius:100px;transition:width .4s;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;">
+        <span><span style="display:inline-block;width:8px;height:8px;background:${pct>85?"#ef4444":"#3b82f6"};border-radius:2px;margin-right:4px;"></span>已投广告费 ${fmt(c.adSpent)}</span>
+        <span style="color:${low?"#ef4444":"#22c55e"};font-weight:600;">${pct}% used</span>
+      </div>
+      ${low?`<div style="margin-top:8px;font-size:12px;color:#ef4444;background:#fef2f2;border-radius:8px;padding:5px 10px;">⚠️ 剩余预算不足 $3,000，请谨慎设置广告预算</div>`:""}
+    </div>`;
+  }).join("");
+}
+
+// ─── Right panel ──────────────────────────────────────────────────────────────
+function rightPanelHTML() {
+  const lc = liveC();
+  const et = estTotal();
+  const hasPreview = S.form.dailyBudget && S.form.startDate && S.form.endDate;
+  return `<div style="display:flex;flex-direction:column;gap:14px;">
+
+    ${lc ? `<div class="panel">
+      <div class="section-label">Budget Overview</div>
+      <div style="font-size:12.5px;font-weight:600;color:#0f172a;margin-bottom:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${lc.name}</div>
+      <!-- stacked bar: adSpent (blue) + this launch preview (light blue) + remaining (grey) -->
+      <div class="budget-bar" style="height:10px;margin-bottom:10px;">
+        <div style="display:flex;height:100%;">
+          <div style="width:${lc.adSpent/lc.budget*100}%;background:#3b82f6;"></div>
+          ${hasPreview?`<div style="width:${Math.min(et/lc.budget*100, avail(lc)/lc.budget*100)}%;background:#93c5fd;opacity:.85;"></div>`:""}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        ${[
+          {color:"#3b82f6", label:"已投广告费",  value:fmt(lc.adSpent)},
+          ...(hasPreview?[{color:"#93c5fd",label:"本次预估",value:fmt(et),italic:true}]:[]),
+          {color:"#e2e8f0", label:"剩余可用",    value:fmt(avail(lc)-(hasPreview?Math.min(et,avail(lc)):0)), bold:true, border:true},
+        ].map(r=>`
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div style="width:10px;height:10px;background:${r.color};border-radius:3px;${r.border?"border:1px solid #cbd5e1;":""}flex-shrink:0;"></div>
+            <span style="font-size:12px;color:#64748b;flex:1;font-style:${r.italic?"italic":"normal"};">${r.label}</span>
+            <span style="font-size:12px;font-weight:${r.bold?700:500};color:${r.bold?"#0f172a":"#64748b"};">${r.value}</span>
+          </div>`).join("")}
+      </div>
+    </div>` : ""}
+
+    <div class="panel">
+      <div class="section-label">Current Selection</div>
+      ${[
+        {icon:"📢",label:"Campaign",value:S.form.campaign?.name},
+        {icon:"📡",label:"Platform",value:PLATFORMS.find(p=>p.id===S.form.platform)?.name},
+        {icon:"💰",label:"预算",    value:S.form.dailyBudget?`${fmt(S.form.dailyBudget)}/天`:null},
+        {icon:"📅",label:"排期",    value:(S.form.startDate&&S.form.endDate)?`${S.form.startDate} → ${S.form.endDate}`:null},
+        {icon:"🎯",label:"目标",    value:S.form.objective},
+        {icon:"👥",label:"受众",    value:S.form.audience},
+      ].map(r=>`
+        <div style="display:flex;gap:8px;margin-bottom:9px;align-items:flex-start;">
+          <span style="font-size:13px;flex-shrink:0;margin-top:1px;">${r.icon}</span>
+          <div style="min-width:0;">
+            <div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">${r.label}</div>
+            <div style="font-size:12.5px;color:${r.value?"#0f172a":"#cbd5e1"};font-weight:${r.value?500:400};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.value||"—"}</div>
+          </div>
+        </div>`).join("")}
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1e3a8a,#3730a3);border-radius:16px;padding:18px 20px;color:#fff;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px;">💡 Tips</div>
+      <div style="font-size:12px;color:#bfdbfe;line-height:1.7;">
+        ${S.step===0?"选择预算充足的 Campaign，广告费用会从 Campaign 总预算中实时扣除。":""}
+        ${S.step===1?"Meta 适合品牌曝光和再营销，Google 适合捕捉主动搜索意图的用户。":""}
+        ${S.step===2?"日预算建议不超过剩余可用预算的 10%，便于持续优化调整。":""}
+        ${S.step===3?"Lookalike 受众通常比兴趣定向有更高转化率，建议优先测试。":""}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── Step content ─────────────────────────────────────────────────────────────
+function stepContentHTML() {
+  const lc   = liveC();
+  const et   = estTotal();
+  const ed   = estDays();
+  const over = overBudget();
+  const hasBudget = S.form.dailyBudget && S.form.startDate && S.form.endDate;
+
+  // STEP 0 ── Select Campaign
+  if (S.step===0) return `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:17px;font-weight:700;color:#0f172a;">选择 Active Campaign</div>
+      <div style="font-size:13px;color:#64748b;margin-top:3px;">广告费用将从所选 Campaign 的总预算中扣除</div>
+    </div>
+    ${campaignCardsHTML()}`;
+
+  // STEP 1 ── Platform
+  if (S.step===1) return `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:17px;font-weight:700;color:#0f172a;">选择广告平台</div>
+      <div style="font-size:13px;color:#64748b;margin-top:3px;">选择投放渠道</div>
+    </div>
+    <div class="grid2col">
+      ${PLATFORMS.map(p => {
+        const sel = S.form.platform===p.id;
+        return `<div class="plat-card" onclick="selectPlatform('${p.id}')"
+          style="border-color:${sel?p.color:"#e8ecf0"};background:${sel?p.bg:"#fafafa"};${sel?`box-shadow:0 4px 20px ${p.color}22;`:""}">
+          <div style="width:52px;height:52px;background:${p.color};border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;color:#fff;font-weight:900;">${p.icon}</div>
+          <div style="font-weight:700;font-size:15px;color:${sel?p.color:"#0f172a"};">${p.name}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">${p.desc}</div>
+          ${sel?`<div style="margin-top:10px;font-size:12px;color:${p.color};font-weight:600;background:${p.color}18;border-radius:20px;padding:3px 10px;display:inline-block;">✓ 已选择</div>`:""}
+        </div>`;
+      }).join("")}
+    </div>`;
+
+  // STEP 2 ── Budget & Schedule
+  if (S.step===2 && lc) return `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:17px;font-weight:700;color:#0f172a;">广告预算 & 排期</div>
+      <div style="font-size:13px;color:#64748b;margin-top:3px;">广告费用从 Campaign 总预算实时扣除</div>
+    </div>
+
+    <!-- Budget snapshot -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px 20px;margin-bottom:22px;">
+      <div class="section-label">📊 ${lc.name} — 预算明细</div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f1f5f9;">
+        <span style="color:#64748b;">Campaign 总预算</span>
+        <span style="font-weight:800;color:#0f172a;">${fmt(lc.budget)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;">
+        <span style="color:#64748b;">已投放广告费</span>
+        <span style="font-weight:600;color:#3b82f6;">− ${fmt(lc.adSpent)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:2px solid #e2e8f0;margin-top:4px;">
+        <span style="font-size:14px;font-weight:700;color:#0f172a;">本次可用预算</span>
+        <span style="font-size:20px;font-weight:800;color:${avail(lc)<3000?"#ef4444":"#22c55e"};">${fmt(avail(lc))}</span>
+      </div>
+    </div>
+
+    <!-- Inputs -->
+    <div class="grid2col" style="margin-bottom:16px;">
+      <div>
+        <label>日预算 (USD) *</label>
+        <div class="prefix-wrap"><span class="prefix-sym">$</span>
+          <input class="field-input prefix" type="number" placeholder="e.g. 500" value="${S.form.dailyBudget}"
+            oninput="setField('dailyBudget',this.value);rerender();"/>
+        </div>
+      </div>
+      <div>
+        <label>总上限 (USD)</label>
+        <div class="prefix-wrap"><span class="prefix-sym">$</span>
+          <input class="field-input prefix" type="number" placeholder="选填" value="${S.form.totalBudget}"
+            oninput="setField('totalBudget',this.value);rerender();"/>
+        </div>
+      </div>
+      <div>
+        <label>开始日期 *</label>
+        <input class="field-input" type="date" value="${S.form.startDate}"
+          oninput="setField('startDate',this.value);rerender();"/>
+      </div>
+      <div>
+        <label>结束日期 *</label>
+        <input class="field-input" type="date" value="${S.form.endDate}"
+          oninput="setField('endDate',this.value);rerender();"/>
+      </div>
+    </div>
+
+    <!-- Real-time estimate -->
+    ${hasBudget ? `
+    <div style="border-radius:12px;padding:14px 18px;background:${over?"#fef2f2":"#f0fdf4"};border:1px solid ${over?"#fecaca":"#bbf7d0"};">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${over?6:0}px;">
+        <span style="font-size:13px;color:${over?"#dc2626":"#166534"};font-weight:500;">
+          ${over?"⚠️":"✅"} 预估总花费：<b>${fmt(et)}</b>（${ed} 天 × ${fmt(S.form.dailyBudget)}/天）
+        </span>
+        <span style="font-size:13px;font-weight:700;color:${over?"#dc2626":"#166534"};">
+          ${over?`超出 ${fmt(et-avail(lc))}`:`扣后剩 ${fmt(avail(lc)-et)}`}
+        </span>
+      </div>
+      ${over?`<div style="font-size:12px;color:#dc2626;">请降低日预算或缩短排期，当前可用 <b>${fmt(avail(lc))}</b></div>`:""}
+    </div>` : ""}`;
+
+  // STEP 3 ── Audience
+  if (S.step===3) return `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:17px;font-weight:700;color:#0f172a;">受众 & 创意</div>
+      <div style="font-size:13px;color:#64748b;margin-top:3px;">配置投放目标和广告信息</div>
+    </div>
+    ${["objective","audience"].map((key,i)=>`
+      <div style="margin-bottom:16px;">
+        <label>${["投放目标 *","目标受众 *"][i]}</label>
+        <select class="field-input" onchange="setField('${key}',this.value);rerender();">
+          <option value="">请选择...</option>
+          ${(key==="objective"?OBJECTIVES:AUDIENCES).map(o=>`<option value="${o}"${S.form[key]===o?" selected":""}>${o}</option>`).join("")}
+        </select>
+      </div>`).join("")}
+    <div style="margin-bottom:16px;">
+      <label>广告名称</label>
+      <input class="field-input" type="text" placeholder="e.g. Latam_Q1_Conv_v1" value="${S.form.adName}"
+        oninput="setField('adName',this.value);"/>
+    </div>
+    <div style="margin-bottom:4px;">
+      <label>UTM 参数</label>
+      <input class="field-input" type="text" placeholder="utm_source=portal&utm_medium=paid" value="${S.form.utm}"
+        oninput="setField('utm',this.value);" style="font-family:monospace;font-size:12px;"/>
+      <div style="font-size:11px;color:#94a3b8;margin-top:5px;">留空将自动生成</div>
+    </div>`;
+
+  // STEP 4 ── Review & Launch
+  if (S.step===4 && lc) {
+    const afterRem = avail(lc) - et;
+    const plat     = PLATFORMS.find(p=>p.id===S.form.platform);
+    return `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:17px;font-weight:700;color:#0f172a;">确认 & 投放</div>
+      <div style="font-size:13px;color:#64748b;margin-top:3px;">上线前请确认以下信息</div>
+    </div>
+
+    <!-- Budget impact box -->
+    <div style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:14px;padding:16px 20px;margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:700;color:#1d4ed8;letter-spacing:.06em;margin-bottom:12px;">💰 本次投放预算影响</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;">
+        <span style="color:#64748b;">Campaign 总预算</span>
+        <span style="font-weight:700;color:#0f172a;">${fmt(lc.budget)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:10px;border-bottom:1px dashed #bfdbfe;margin-bottom:10px;">
+        <span style="color:#3b82f6;">已投放广告费</span>
+        <span style="font-weight:600;color:#3b82f6;">− ${fmt(lc.adSpent)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;">
+        <span style="color:#1d4ed8;font-weight:600;">当前可用</span>
+        <span style="font-weight:700;color:#1d4ed8;">${fmt(avail(lc))}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:10px;border-bottom:1px dashed #bfdbfe;margin-bottom:10px;">
+        <span style="color:#dc2626;font-weight:600;">本次扣除（预估）</span>
+        <span style="font-weight:700;color:#dc2626;">− ${fmt(et)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:14px;font-weight:700;color:#0f172a;">投放后剩余</span>
+        <span style="font-size:20px;font-weight:800;color:${afterRem<2000?"#ef4444":"#22c55e"};">${fmt(afterRem)}</span>
+      </div>
+    </div>
+
+    <!-- Summary rows -->
+    ${[
+      ["Campaign", lc.name,                                           lc.id],
+      ["Platform", plat?.name],
+      ["日预算",   `${fmt(S.form.dailyBudget)} / day`],
+      ["排期",     `${S.form.startDate} → ${S.form.endDate}（${ed} 天）`],
+      ["目标",     S.form.objective],
+      ["受众",     S.form.audience],
+      ["广告名称", S.form.adName||"(自动生成)"],
+      ["UTM",      S.form.utm||"utm_source=portal&utm_medium=paid (auto)"],
+    ].map(([k,v,sub])=>`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+        <span style="font-size:13px;color:#64748b;font-weight:500;min-width:80px;">${k}</span>
+        <div style="text-align:right;">
+          <div style="font-size:13px;font-weight:600;color:#0f172a;">${v||""}</div>
+          ${sub?`<div style="font-size:11px;color:#94a3b8;font-family:monospace;">${sub}</div>`:""}
+        </div>
+      </div>`).join("")}
+
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 16px;margin-top:16px;font-size:13px;color:#92400e;">
+      ⚠️ 提交后广告将进入 <b>${plat?.name}</b> 审核，审核通过后开始计费，费用从 Campaign 预算实时扣除。
+    </div>
+    <button id="launchBtn" onclick="doLaunch()"
+      style="width:100%;margin-top:20px;background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 20px rgba(37,99,235,.35);font-family:'Outfit',sans-serif;transition:all .2s;">
+      🚀 确认投放
+    </button>`;
+  }
+  return "";
+}
+
+// ─── Success screen ───────────────────────────────────────────────────────────
+function successHTML() {
+  const snap     = S.launchSnapshot;
+  const after    = S.campaigns.find(c=>c.id===snap.campaignId);
+  const pct      = pctUsed(after);
+  const rem      = avail(after);
+  const plat     = PLATFORMS.find(p=>p.id===S.form.platform);
+  return `
+  <div style="animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;background:#fff;border-radius:20px;padding:48px 40px;text-align:center;max-width:560px;margin:0 auto;box-shadow:0 4px 32px rgba(0,0,0,.08);">
+    <div style="font-size:64px;margin-bottom:12px;">🚀</div>
+    <div style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:6px;">广告已成功提交！</div>
+    <div style="color:#64748b;font-size:14px;margin-bottom:24px;">
+      <b style="color:#0f172a;">${snap.campaignName}</b> · <b style="color:${plat?.color};">${plat?.name}</b>
+    </div>
+
+    <!-- Post-launch budget -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:18px 22px;margin-bottom:24px;text-align:left;">
+      <div class="section-label">Campaign 预算更新</div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f1f5f9;">
+        <span style="color:#64748b;">Campaign 总预算</span>
+        <span style="font-weight:800;color:#0f172a;">${fmt(after.budget)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f1f5f9;">
+        <span style="color:#64748b;">本次广告投放</span>
+        <span style="font-weight:700;color:#2563eb;background:#eff6ff;padding:2px 8px;border-radius:6px;">− ${fmt(snap.spend)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;">
+        <span style="color:#64748b;">累计广告费（含本次）</span>
+        <span style="font-weight:600;color:#3b82f6;">− ${fmt(after.adSpent)}</span>
+      </div>
+      <!-- progress bar -->
+      <div class="budget-bar" style="height:8px;margin:14px 0 8px;">
+        <div style="width:${pct}%;height:100%;background:${pct>85?"#ef4444":"#3b82f6"};border-radius:100px;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:12px;color:#94a3b8;">${pct}% 已使用</span>
+        <span style="font-size:13px;font-weight:700;color:${rem<2000?"#ef4444":"#22c55e"};">剩余 ${fmt(rem)}</span>
+      </div>
+    </div>
+
+    <button onclick="doReset()"
+      style="background:#2563eb;color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">
+      + 继续投放
+    </button>
+  </div>`;
+}
+
+// ─── Ads Performance Page ────────────────────────────────────────────────────
+function fmtK(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + "M";
+  if (n >= 1000)    return (n/1000).toFixed(1)    + "K";
+  return String(n);
+}
+
+const RANK_OPTIONS = [
+  { key:"depositAmount",  label:"Deposit Amount" },
+  { key:"firstDeposit",   label:"First Deposit Users" },
+  { key:"ev",             label:"EV" },
+  { key:"leads",          label:"Leads" },
+  { key:"clicks",         label:"Clicks" },
+  { key:"impressions",    label:"Impressions" },
+];
+
+function adsPerformanceHTML() {
+  const { expandedId, rankBy, period, filterChannel, filterCampaign, filterCountry } = S.perf;
+  const periods = ["Last 7 days","Last 30 days","Last 90 days"];
+
+  const FILTER_OPTS = {
+    channel:  ["All", "Meta Ads", "Google Ads"],
+    campaign: ["All", "Q1 Latam Growth Campaign", "Brazil Market Expansion", "ES Spring Promo"],
+    country:  ["All", "Brazil", "Mexico", "Spain", "Argentina", "Colombia"],
+  };
+
+  const activeFilters = [
+    filterChannel  !== "All" ? {key:"filterChannel",  label:`Channel: ${filterChannel}`}  : null,
+    filterCampaign !== "All" ? {key:"filterCampaign", label:`Campaign: ${filterCampaign}`} : null,
+    filterCountry  !== "All" ? {key:"filterCountry",  label:`Country: ${filterCountry}`}   : null,
+  ].filter(Boolean);
+
+  const hasFilters = activeFilters.length > 0;
+
+  function filterDropdown(field, label, value, opts) {
+    const active = value !== "All";
+    return `
+    <div style="position:relative;display:inline-block;">
+      <select onchange="setPerfFilter('${field}',this.value)"
+        style="appearance:none;-webkit-appearance:none;padding:8px 32px 8px 12px;border-radius:9px;
+               border:1.5px solid ${active?"#3b82f6":"#e2e8f0"};
+               background:${active?"#eff6ff":"#fff"};
+               color:${active?"#2563eb":"#374151"};
+               font-size:12.5px;font-weight:${active?700:500};
+               cursor:pointer;font-family:'Outfit',sans-serif;
+               box-shadow:${active?"0 0 0 3px rgba(59,130,246,.12)":"none"};
+               transition:all .15s;min-width:130px;">
+        <option value="" disabled style="color:#94a3b8;">${label}</option>
+        ${opts.map(o=>`<option value="${o}"${value===o?" selected":""}>${o==="All"?"All "+label+"s":o}</option>`).join("")}
+      </select>
+      <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:${active?"#2563eb":"#94a3b8"};">▾</span>
+      ${active?`<span onclick="setPerfFilter('${field}','All')" style="position:absolute;right:26px;top:50%;transform:translateY(-50%);font-size:11px;color:#94a3b8;cursor:pointer;padding:2px;">✕</span>`:""}
+    </div>`;
+  }
+
+  // Budget vs Spent section
+  function budgetRow(am) {
+    const pct     = Math.min(100, Math.round(am.spent / am.totalBudget * 100));
+    const over    = am.spent >= am.totalBudget;
+    const barColor = over ? "#ef4444" : "#3b82f6";
+    const isOpen  = expandedId === am.id;
+    const m       = am.metrics;
+    return `
+    <div style="border-bottom:1px solid #f1f5f9;">
+      <!-- Row -->
+      <div onclick="togglePerf('${am.id}')" style="display:grid;grid-template-columns:32px 1fr 120px 1fr 160px;align-items:center;padding:13px 20px;cursor:pointer;gap:12px;transition:background .12s;"
+        onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+        <span style="font-size:13px;color:#94a3b8;text-align:center;">${isOpen ? "−" : "+"}</span>
+        <span style="font-size:13.5px;font-weight:${isOpen?600:500};color:#0f172a;">${am.name}</span>
+        <span style="font-size:13px;color:#374151;text-align:right;">${fmt(am.totalBudget)}</span>
+        <!-- Progress bar -->
+        <div style="position:relative;height:6px;background:#e2e8f0;border-radius:100px;overflow:hidden;">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${barColor};border-radius:100px;transition:width .6s;"></div>
+        </div>
+        <span style="font-size:12.5px;font-weight:600;color:${over?"#ef4444":"#374151"};text-align:right;white-space:nowrap;">
+          ${fmt(am.spent)} / ${fmt(am.totalBudget)}
+        </span>
+      </div>
+
+      <!-- Expanded detail metrics -->
+      ${isOpen ? `
+      <div style="background:#f8fafc;border-top:1px solid #f1f5f9;padding:20px 28px 24px 64px;animation:fadeUp .25s ease both;">
+        <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:14px;">
+          Detailed metrics <span style="color:#94a3b8;font-weight:400;">(time period: ${period})</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px 32px;">
+          ${[
+            {label:"Impressions",        val:fmtK(m.impressions)},
+            {label:"Clicks",             val:fmtK(m.clicks)},
+            {label:"Leads",              val:fmtK(m.leads)},
+            {label:"EV",                 val:fmt(m.ev)},
+            {label:"First Deposit Users",val:m.firstDeposit.toLocaleString()},
+            {label:"Deposit Amount",     val:fmt(m.depositAmount)},
+          ].map(item=>`
+            <div>
+              <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:4px;">${item.label}</div>
+              <div style="font-size:20px;font-weight:700;color:#0f172a;">${item.val}</div>
+            </div>`).join("")}
+        </div>
+      </div>` : ""}
+    </div>`;
+  }
+
+  // Rankings section
+  const rkOpt  = RANK_OPTIONS.find(r=>r.key===rankBy) || RANK_OPTIONS[0];
+  const ranked = [...ADS_MANAGERS].sort((a,b) => {
+    if (rankBy === "depositAmount" || rankBy === "ev") return b.metrics[rankBy] - a.metrics[rankBy];
+    return b.metrics[rankBy] - a.metrics[rankBy];
+  });
+
+  const medals = ["🥇","🥈","🥉"];
+
+  return `
+  <div style="animation:fadeUp .4s ease both;">
+
+    <!-- Page header -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <h1 style="font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-.5px;">Ads Performance</h1>
+          <p style="font-size:13px;color:#64748b;margin-top:3px;">比较投手表现，查看预算使用与关键指标。</p>
+        </div>
+        <!-- Period selector -->
+        <div style="display:flex;gap:6px;">
+          ${periods.map(p=>`
+            <button onclick="setPeriod('${p}')"
+              style="padding:7px 14px;border-radius:8px;border:1.5px solid ${S.perf.period===p?"#3b82f6":"#e2e8f0"};background:${S.perf.period===p?"#eff6ff":"#fff"};color:${S.perf.period===p?"#2563eb":"#64748b"};font-size:12px;font-weight:${S.perf.period===p?700:500};cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;">
+              ${p}
+            </button>`).join("")}
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:600;color:#94a3b8;white-space:nowrap;">Filter by:</span>
+        ${filterDropdown("filterChannel",  "Channel",  filterChannel,  FILTER_OPTS.channel)}
+        ${filterDropdown("filterCampaign", "Campaign", filterCampaign, FILTER_OPTS.campaign)}
+        ${filterDropdown("filterCountry",  "Country",  filterCountry,  FILTER_OPTS.country)}
+
+        <!-- Active filter chips -->
+        ${activeFilters.map(f=>`
+          <div style="display:flex;align-items:center;gap:5px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:4px 10px 4px 12px;">
+            <span style="font-size:12px;color:#2563eb;font-weight:500;">${f.label}</span>
+            <span onclick="setPerfFilter('${f.key}','All')" style="font-size:11px;color:#93c5fd;cursor:pointer;font-weight:700;padding:1px 2px;border-radius:50%;"
+              onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#93c5fd'">✕</span>
+          </div>`).join("")}
+
+        ${hasFilters ? `
+          <button onclick="clearAllFilters()"
+            style="padding:5px 12px;border-radius:8px;border:none;background:transparent;color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:underline;"
+            onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#94a3b8'">
+            Clear all
+          </button>` : ""}
+      </div>
+    </div>
+
+    <!-- Budget vs Spent Table -->
+    <div style="background:#fff;border-radius:16px;box-shadow:0 1px 12px rgba(0,0,0,.06);margin-bottom:24px;overflow:hidden;">
+      <div style="padding:18px 20px 14px;border-bottom:1px solid #f1f5f9;">
+        <div style="font-size:14px;font-weight:700;color:#0f172a;">Ads Manager Budget vs Spent</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Click a row to expand and view detailed metrics (impressions, clicks, leads, EV, first deposit users, deposit amount).</div>
+      </div>
+      <!-- Table header -->
+      <div style="display:grid;grid-template-columns:32px 1fr 120px 1fr 160px;padding:10px 20px;gap:12px;background:#f8fafc;border-bottom:1px solid #f1f5f9;">
+        <div></div>
+        <div style="font-size:12px;font-weight:700;color:#374151;">Ads Manager</div>
+        <div style="font-size:12px;font-weight:700;color:#374151;text-align:right;">Total Budget</div>
+        <div style="font-size:12px;font-weight:700;color:#374151;padding-left:8px;">Actual Spent</div>
+        <div></div>
+      </div>
+      ${ADS_MANAGERS.map(am => budgetRow(am)).join("")}
+    </div>
+
+    <!-- Rankings -->
+    <div style="background:#fff;border-radius:16px;box-shadow:0 1px 12px rgba(0,0,0,.06);overflow:hidden;">
+      <div style="padding:18px 20px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:14px;font-weight:700;color:#0f172a;">Rankings</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:#64748b;">Rank by:</span>
+          <select onchange="setRankBy(this.value)"
+            style="padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:600;color:#374151;background:#fff;cursor:pointer;font-family:'Outfit',sans-serif;">
+            ${RANK_OPTIONS.map(r=>`<option value="${r.key}"${rankBy===r.key?" selected":""}>${r.label}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <!-- Table header -->
+      <div style="display:grid;grid-template-columns:60px 1fr 180px;padding:10px 20px;gap:12px;background:#f8fafc;border-bottom:1px solid #f1f5f9;">
+        <div style="font-size:12px;font-weight:700;color:#374151;">Rank</div>
+        <div style="font-size:12px;font-weight:700;color:#374151;">Ads Manager</div>
+        <div style="font-size:12px;font-weight:700;color:#374151;text-align:right;">${rkOpt.label}</div>
+      </div>
+      ${ranked.map((am, idx) => {
+        const val = rankBy==="depositAmount"||rankBy==="ev" ? fmt(am.metrics[rankBy]) : rankBy==="clicks"||rankBy==="impressions" ? fmtK(am.metrics[rankBy]) : rankBy==="firstDeposit" ? am.metrics.firstDeposit.toLocaleString() : fmtK(am.metrics[rankBy]);
+        const isTop = idx < 3;
+        return `
+        <div style="display:grid;grid-template-columns:60px 1fr 180px;padding:14px 20px;gap:12px;border-bottom:1px solid #f8fafc;align-items:center;transition:background .12s;"
+          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:${isTop?18:13}px;">${medals[idx]||""}</span>
+            <span style="font-size:13px;font-weight:${isTop?700:500};color:${isTop?"#0f172a":"#64748b"};">${isTop?"":idx+1}</span>
+          </div>
+          <div style="font-size:13.5px;font-weight:${isTop?600:400};color:#0f172a;">${am.name}</div>
+          <div style="font-size:14px;font-weight:${isTop?700:500};color:${isTop?"#2563eb":"#374151"};text-align:right;">${val}</div>
+        </div>`;
+      }).join("")}
+    </div>
+
+  </div>`;
+}
+
+// ─── Main render ──────────────────────────────────────────────────────────────
+function rerender() {
+  renderNav();
+  const el = document.getElementById("content");
+
+  // ── Ads Performance page ──
+  if (S.activeNav === "Ads Performance") {
+    document.getElementById("breadcrumb").textContent = "📈 Ads Performance";
+    el.innerHTML = adsPerformanceHTML();
+    return;
+  }
+  document.getElementById("breadcrumb").textContent = "🚀 Launch Ads";
+  const header = `
+    <div style="margin-bottom:24px;animation:fadeUp .4s ease both;">
+      <h1 style="font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-.5px;">Launch Ads</h1>
+      <p style="font-size:13px;color:#64748b;margin-top:3px;">选择 Campaign，设置广告预算（从 Campaign 总预算扣除），一键投放。</p>
+    </div>`;
+
+  if (S.launched && S.launchSnapshot) {
+    el.innerHTML = header + successHTML();
+    return;
+  }
+
+  const nc = canNext();
+  el.innerHTML = `
+    ${header.replace("</div>", `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-16px;margin-bottom:8px;">
+        <div></div>
+        <div style="display:flex;align-items:center;gap:4px;">${stepperHTML()}</div>
+      </div>
+    </div>`)}
+    <div class="grid2${S.step===4?" full":""}">
+      <div class="card">
+        ${stepContentHTML()}
+        ${S.step<4?`
+        <div style="display:flex;justify-content:space-between;margin-top:24px;padding-top:20px;border-top:1px solid #f1f5f9;">
+          <button class="btn-back" onclick="goBack()" ${S.step===0?"disabled":""}>← 返回</button>
+          <button class="btn-next" onclick="goNext()" ${nc?"":"disabled"}
+            style="background:${nc?"#2563eb":"#e2e8f0"};color:${nc?"#fff":"#94a3b8"};box-shadow:${nc?"0 2px 12px rgba(37,99,235,.25)":"none"};">
+            ${S.step===3?"确认 →":"下一步 →"}
+          </button>
+        </div>`:""}
+      </div>
+      ${S.step<4?`<div>${rightPanelHTML()}</div>`:""}
+    </div>`;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function selectCampaign(id)   { S.form.campaign = S.campaigns.find(c=>c.id===id); rerender(); }
+function selectPlatform(id)   { S.form.platform = id; rerender(); }
+function setField(key, val)   { S.form[key] = val; }
+function goStep(i)            { S.step = i; rerender(); }
+function goNext()             { if (canNext() && S.step<4) { S.step++; rerender(); } }
+function goBack()             { if (S.step>0) { S.step--; rerender(); } }
+
+function doReset() {
+  S.step=0; S.launched=false; S.launchSnapshot=null;
+  S.form={campaign:null,platform:null,dailyBudget:"",totalBudget:"",startDate:"",endDate:"",objective:"",audience:"",adName:"",utm:""};
+  rerender();
+}
+
+function doLaunch() {
+  const lc = liveC();
+  const et = estTotal();
+  const snap = { campaignId:lc.id, campaignName:lc.name, spend:et };
+  S.launchSnapshot = snap;
+  // Deduct from adSpent
+  S.campaigns = S.campaigns.map(c => c.id===lc.id ? {...c, adSpent:c.adSpent+et} : c);
+  // Spinner
+  const btn = document.getElementById("launchBtn");
+  if (btn) { btn.disabled=true; btn.style.background="#94a3b8"; btn.style.boxShadow="none"; btn.innerHTML=`<div class="spin-el"></div> 提交中...`; }
+  setTimeout(()=>{ S.launched=true; rerender(); }, 2000);
+}
+
+function togglePerf(id)       { S.perf.expandedId = S.perf.expandedId===id ? null : id; rerender(); }
+function setRankBy(key)       { S.perf.rankBy = key; rerender(); }
+function setPeriod(p)         { S.perf.period = p; rerender(); }
+function setPerfFilter(k, v)  { S.perf[k] = v; rerender(); }
+function clearAllFilters()    { S.perf.filterChannel="All"; S.perf.filterCampaign="All"; S.perf.filterCountry="All"; rerender(); }
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+rerender();
+</script>
+</body>
+</html>
